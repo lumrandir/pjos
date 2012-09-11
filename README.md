@@ -1,4 +1,4 @@
-pjos
+﻿pjos
 ====
 
 PJOS (Prolog Jumping Over railS) is a simple web-based client-server
@@ -11,3 +11,5 @@ web-interfaces.
 You can freely clone and redistribute this application, I don't give a fuck.
 
 Kiitos.
+
+Hei, jeg gleder meg til å se dere!
