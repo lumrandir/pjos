@@ -1,14 +1,34 @@
 :- module(listener, []).
 :- use_module(library(socket)).
-:- use_module(library(streampool)).
 
-listen_udp(Port) :-
-  udp_socket(S),
-  tcp_bind(S, Port),
+close_connection(In, Out) :-
+  close(In, [ force(true) ]),
+  close(Out, [ force(true) ]).
+
+dispatch(AcceptFd) :-
+  tcp_accept(AcceptFd, Socket, _Peer),
+  fork(Pid),
+  (
+      Pid == child
+  ->  tcp_open_socket(Socket, In, Out),
+      handle_service(In, Out),
+      close_connection(In, Out),
+      halt
+  ;   tcp_close_socket(Socket)
+  ),
+  dispatch(AcceptFd).
+
+handle_service(In, Out) :-
   repeat,
-  udp_receive(S, Data, From, [as(atom)]),
-  format('Got ~q from ~q~n', [Data, From]),
-  fail.
+    (
+        at_end_of_stream(In)
+    ->  !
+    ;   read_pending_input(In, String, []),
+        string_to_atom(String, Atom),
+        format(Out, '~q~n', [ Atom ]),
+        flush_output(Out),
+        fail
+    ).
 
 listen_tcp(Port) :-
   tcp_socket(Socket),
@@ -17,14 +37,13 @@ listen_tcp(Port) :-
   tcp_open_socket(Socket, AcceptFd, _),
   dispatch(AcceptFd).
 
-dispatch(AcceptFd) :-
-  tcp_accept(AcceptFd, Socket, _Peer),
-  tcp_open_socket(Socket, In, Out),
-  read(In, Term),
-  write(Term),
-  close(In), close(Out),
-  tcp_close_socket(Socket),
-  dispatch(AcceptFd).
+listen_udp(Port) :-
+  udp_socket(S),
+  tcp_bind(S, Port),
+  repeat,
+  udp_receive(S, Data, From, [ as(atom) ]),
+  format('Got ~q from ~q~n', [ Data, From ]),
+  fail.
 
 ?- listen_tcp(1337).
 
