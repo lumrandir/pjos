@@ -11,5 +11,3 @@ web-interfaces.
 You can freely clone and redistribute this application, I don't give a fuck.
 
 Kiitos.
-
-Hei, jeg gleder meg til å se dere!
