@@ -1,5 +1,7 @@
 :- module(listener, []).
 :- use_module(library(socket)).
+:- use_module(solver).
+:- encoding(utf8).
 
 close_connection(In, Out) :-
   close(In, [ force(true) ]),
@@ -19,16 +21,17 @@ dispatch(AcceptFd) :-
   dispatch(AcceptFd).
 
 handle_service(In, Out) :-
-  repeat,
-    (
-        at_end_of_stream(In)
-    ->  !
-    ;   read_pending_input(In, String, []),
-        string_to_atom(String, Atom),
-        format(Out, '~q~n', [ Atom ]),
-        flush_output(Out),
-        fail
-    ).
+  solver:solver(In, Out).
+%  repeat,
+%    (
+%        at_end_of_stream(In)
+%    ->  !
+%    ;   read_pending_input(In, String, []),
+%        string_to_atom(String, Atom),
+%        format(Out, '~q~n', [ Atom ]),
+%        flush_output(Out),
+%        fail
+%    ).
 
 listen_tcp(Port) :-
   tcp_socket(Socket),
@@ -45,5 +48,5 @@ listen_udp(Port) :-
   format('Got ~q from ~q~n', [ Data, From ]),
   fail.
 
-?- listen_tcp(1337).
+?- listen_tcp(1339).
 
