@@ -24,6 +24,11 @@
   <%= csrf_meta_tags %>
 </head>
 <body>
+  <div class="row">
+    <% if flash[:error] %>
+      <div class="error"><%= flash[:error] %></div>
+    <% end %>
+  </div>
   <%= yield %>
 </body>
 </html>
