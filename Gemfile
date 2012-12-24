@@ -12,4 +12,3 @@ group :assets do
 end
 
 gem 'jquery-rails'
-gem "leash", :git => "git://github.com/lumrandir/leash.git"

@@ -1,4 +1,4 @@
-:- module(listener, []).
+:- module(listener, [ ]).
 :- use_module(library(socket)).
 :- use_module(solver).
 :- encoding(utf8).
@@ -13,6 +13,8 @@ dispatch(AcceptFd) :-
   (
       Pid == child
   ->  tcp_open_socket(Socket, In, Out),
+      set_stream(In, encoding(utf8)),
+      set_stream(Out, encoding(utf8)),
       handle_service(In, Out),
       close_connection(In, Out),
       halt
@@ -21,17 +23,7 @@ dispatch(AcceptFd) :-
   dispatch(AcceptFd).
 
 handle_service(In, Out) :-
-  solver:solver(In, Out).
-%  repeat,
-%    (
-%        at_end_of_stream(In)
-%    ->  !
-%    ;   read_pending_input(In, String, []),
-%        string_to_atom(String, Atom),
-%        format(Out, '~q~n', [ Atom ]),
-%        flush_output(Out),
-%        fail
-%    ).
+  solver:run(In, Out).
 
 listen_tcp(Port) :-
   tcp_socket(Socket),
@@ -40,13 +32,4 @@ listen_tcp(Port) :-
   tcp_open_socket(Socket, AcceptFd, _),
   dispatch(AcceptFd).
 
-listen_udp(Port) :-
-  udp_socket(S),
-  tcp_bind(S, Port),
-  repeat,
-  udp_receive(S, Data, From, [ as(atom) ]),
-  format('Got ~q from ~q~n', [ Data, From ]),
-  fail.
-
-?- listen_tcp(1339).
-
+?- listen_tcp(1337).
