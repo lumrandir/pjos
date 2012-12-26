@@ -1,4 +1,11 @@
 Pjos::Application.routes.draw do
-  resources :bones, :only => [ :create, :new ]
+  resource :dialog do
+    collection do
+      post :answer
+      post :question
+      post :reload
+    end
+  end
+  
   root :to => "welcome#index"
 end

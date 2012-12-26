@@ -17,13 +17,38 @@ var post = function(url, data, success) {
 };
 
 var reload = function(e) {
-  $("#content").append("<p>Ди нахуй!</p>");
+  post("/dialog/reload.json", {}, function(response) {
+    if (response.message) {
+      if (response.message.error)
+        $("#content").append("<div class='alert-box alert'>" +
+          response.message.error +
+          "<a href='' class='close'>&times;</a>" +
+          "</div>"
+        );
+      if (response.message.info)
+        $("#content").append("<div class='alert-box'>" +
+          response.message.info +
+          "<a href='' class='close'>&times;</a>" +
+          "</div>"
+        );
+    } else {
+      post("/dialog/question.json", {}, function(r) {
+        $("#content").append("<p>" + r.data + "</p>");
+      });
+    }
+  });
   return false;
 };
 
 var submit = function(e) {
   var last = $("#content").find("p").last();
-  last.text(last.text() + " Да-да, уже ухожу.");
+  var value = $("#value").val();
+  last.text(last.text() + " " + value);
+
+  post("/dialog/answer.json", { answer: value }, function(response) {
+    $("#content").append("<p>" + response.data + "</p>");
+  });
+
   return false;
 };
 
