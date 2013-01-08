@@ -17,6 +17,7 @@ var post = function(url, data, success) {
 };
 
 var reload = function(e) {
+  $("#content").empty();
   post("/dialog/reload.json", {}, function(response) {
     if (response.message) {
       if (response.message.error)
