@@ -49,7 +49,6 @@ run(In, Out):-
 	purgateVirt,!,
 	getAllAnswers(In, Out),!,
 	showResults(Out),!,
-	format(Out, 'session_ended~n', []),
   flush_output(Out).
 
 purgateVirt:-
@@ -79,8 +78,9 @@ infer(N,Ct, In, Out):-
   format(Out, '~q~n', [ Name ]),
   flush_output(Out),
   ( 
-    at_end_of_stream(In) ->
-    !;
+    at_end_of_stream(In)
+  ->
+    fail;
     read_pending_input(In, String, []),
     string_to_atom(String, Atom),
     atom_number(Atom, Ct)

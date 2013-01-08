@@ -15,7 +15,7 @@ dispatch(AcceptFd) :-
   ->  tcp_open_socket(Socket, In, Out),
       set_stream(In, encoding(utf8)),
       set_stream(Out, encoding(utf8)),
-      handle_service(In, Out),
+      catch(handle_service(In, Out), E, (print_message(error, E), close_connection(In, Out), halt, tcp_close_socket(Socket))),
       close_connection(In, Out),
       halt
   ;   tcp_close_socket(Socket)

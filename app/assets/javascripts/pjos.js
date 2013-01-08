@@ -47,7 +47,7 @@ var submit = function(e) {
   last.text(last.text() + " " + value);
 
   post("/dialog/answer.json", { answer: value }, function(response) {
-    $("#content").append("<p>" + response.data + "</p>");
+    $("#content").append("<p>" + response.data.replace(/\n/g, "<br />") + "</p>");
   });
 
   return false;
