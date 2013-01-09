@@ -19,4 +19,4 @@ doc/
 *.log
 a.out
 Gemfile.lock
-db/development.sqlite3
+db/*.sqlite3

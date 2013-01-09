@@ -143,8 +143,5 @@ showResults2(Out):- result(Out),fail.
 result(Out):-
 	danswer(N,Ct),
 	node(N,Name),
-  format(Out, 'Следует ~q~n', [ Name ]),
-  flush_output(Out),
-  format(Out, 'Вероятность=~q~n', [ Ct ]),
-  flush_output(Out).
+  format(Out, 'Следует ~q с вероятностью ~q~n', [ Name, Ct ]).
 
