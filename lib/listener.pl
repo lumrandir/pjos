@@ -3,10 +3,12 @@
 :- use_module(solver_additional).
 :- encoding(utf8).
 
+% форсированно закрывает связанные с сокетом потоки
 close_connection(In, Out) :-
   close(In, [ force(true) ]),
   close(Out, [ force(true) ]).
 
+% мониторит открытый сокет и создаёт потоки в случае подключения к нему клиента
 dispatch(AcceptFd) :-
   % принимаем подключение
   tcp_accept(AcceptFd, Socket, _Peer),
@@ -35,9 +37,11 @@ dispatch(AcceptFd) :-
   ),
   dispatch(AcceptFd).
 
+% запускает солвер
 handle_service :-
   solver_additional:run.
 
+% управляет сокетом, связанным с портом
 listen_tcp(Port) :-
   % создаём сокет
   tcp_socket(Socket),
