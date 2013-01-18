@@ -1,6 +1,6 @@
 :- module(listener, [ ]).
 :- use_module(library(socket)).
-:- use_module(solver).
+:- use_module(solver_additional).
 :- encoding(utf8).
 
 close_connection(In, Out) :-
@@ -23,9 +23,9 @@ dispatch(AcceptFd) :-
       % при сбое обработки закрываем потоки и останавливаем подпроцесс
       catch(
         handle_service, 
-        E, 
+        _E, 
         (
-          print_message(error, E), close_connection(In, Out), 
+          close_connection(In, Out), 
           halt, tcp_close_socket(Socket)
         )
       ),
@@ -36,7 +36,7 @@ dispatch(AcceptFd) :-
   dispatch(AcceptFd).
 
 handle_service :-
-  solver:run.
+  solver_additional:run.
 
 listen_tcp(Port) :-
   % создаём сокет
