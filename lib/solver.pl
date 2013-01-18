@@ -1,5 +1,12 @@
-:- module(solver, [ run/2 ]).
+% This buffer is for notes you don't want to save.
+% If you want to create a file, visit that file with C-x C-f,
+% then enter the text in that file's own buffer.
+:- module(solver, []).
 :- dynamic danswer/2, dterm/2.
+
+/*high(1000000).
+
+low(100000).*/
 
 node(1,'снять с учета').
 node(2,'продолжить реабилитацию').
@@ -45,74 +52,89 @@ rule(and,9,14,15,pos,pos,0.95).
 
 %--------------------------------------------------------------
 
-run(In, Out):-
+run:-
 	purgateVirt,!,
-	getAllAnswers(In, Out),!,
-	showResults(Out),!,
-  flush_output(Out).
+%	test,!,
+	getAllAnswers,!,
+	showResults,!,
+	nl,write('Ok, bye!').
 
+%purgateVirt:- nl,write('Это - purgateVirt'),nl. %RTTI
 purgateVirt:-
 	    retractall(danswer(_,_)),
 	    retractall(dterm(_,_)).
 
-getAllAnswers(In, Out):- not(getAllAnswers2(In, Out)).
+%test:-
+%	assert(dterm(3,0.75)),
+%	assert(dterm(4,0.9)),
+%	assert(dterm(5,0.2)),
+%	assert(dterm(6,0.55)),
+%	assert(dterm(7,0.99)),
+%	assert(dterm(8,0.45)),
+%	assert(dterm(9,0.34)),
+%	assert(dterm(10,0.89)),
+%	assert(dterm(11,0.67)).
+%	assert(dterm(12,1)).
+getAllAnswers:- not(getAllAnswers2).
 
-getAllAnswers2(In, Out):- answer(In, Out),fail.
 
-answer(In, Out):-
+
+getAllAnswers2:- answer,fail.
+
+
+answer:-
 	 hyposnode(N),
-	 allinfer(N,Ct, In, Out),
+	 allinfer(N,Ct),
 	 assert(danswer(N,Ct)).
 
-allinfer(N,Ct, In, Out):-
-	findall(X,infer(N,X, In, Out),Ls),
+allinfer(N,Ct):-
+	findall(X,infer(N,X),Ls),
 	supercombine(Ls,Ct).
 
-infer(N,Ct, _In, _Out):-
+
+infer(N,Ct):-
 	termnode(N),
 	dterm(N,Ct),!.
 
-infer(N,Ct, In, Out):-
+
+infer(N,Ct):-
 	termnode(N),
 	node(N,Name),
-  format(Out, '~q~n', [ Name ]),
-  flush_output(Out),
-  ( 
-    at_end_of_stream(In)
-  ->
-    fail;
-    read_pending_input(In, String, []),
-    string_to_atom(String, Atom),
-    atom_number(Atom, Ct)
-  ),
+	write(Name),
+	read(Ct),
 	assert(dterm(N,Ct)).
 
-infer(N,Ct, In, Out):-
+infer(N,Ct):-
 	rule(and,N,Np1,Np2,Sp1,Sp2,C1),
-	allinfer(Np1,Ctp1, In, Out),
-	allinfer(Np2,Ctp2, In, Out),
+	allinfer(Np1,Ctp1),
+	allinfer(Np2,Ctp2),
 	sign(Ctp1,Sp1,Ctsp1),
 	sign(Ctp2,Sp2,Ctsp2),
 	min2(Ctsp1,Ctsp2,Ctmin),
 	Ct is Ctmin*C1.
-
-infer(N,Ct, In, Out):-
+infer(N,Ct):-
 	rule(or,N,Np1,Np2,Sp1,Sp2,C1),
-	allinfer(Np1,Ctp1, In, Out),
-	allinfer(Np2,Ctp2, In, Out),
+	allinfer(Np1,Ctp1),
+	allinfer(Np2,Ctp2),
 	sign(Ctp1,Sp1,Ctsp1),
 	sign(Ctp2,Sp2,Ctsp2),
 	max2(Ctsp1,Ctsp2,Ctmax),
 	Ct is Ctmax*C1.
 
-infer(N,Ct, In, Out):-
+infer(N,Ct):-
 	rule(simple,N,Np1,_,Sp1,_,C1),
-	allinfer(Np1,Ctp1, In, Out),
+	allinfer(Np1,Ctp1),
 	sign(Ctp1,Sp1,Ctsp1),
 	Ct is Ctsp1*C1.
+%sign(Ctp,Sp,Ctp).
+
+%sign(Ctp,Sp,Ctp1):-	Sp='pos',	Ctp1 is Ctp,!.
+%sign(Ctp,Sp,Ctp1):-	Sp='neg',	Ctp1 is 1 - Ctp,!.
 
 sign(X,'pos',X).
 sign(X,'neg',Z):- Z is 1 - X,!.
+
+%min2(X,Y,X).
 
 min2(Ctsp1,Ctsp2,Ctmin):-
 	Ctsp1>=Ctsp2,
@@ -128,6 +150,8 @@ max2(Ctsp1,Ctsp2,Ctmax):-
 	Ctsp2>Ctsp1,
 	Ctmax is Ctsp2,!.
 
+%supercombine(Ls,0.7).
+
 supercombine([Ct],Ct):-!.
 supercombine([C1,C2],Ct):-
 	combine([C1,C2],Ct),!.
@@ -137,11 +161,15 @@ supercombine([C1,C2|Ts],Ct):-
 	supercombine(T1s,Ct).
 combine([C1,C2],Ct):-Ct is C1+C2-C1*C2.
 
-showResults(Out):- not(showResults2(Out)).
+%showResults:- nl,write('Это - showResults'). %RTTI
 
-showResults2(Out):- result(Out),fail.
-result(Out):-
+showResults:- not(showResults2).
+
+showResults2:- result,fail.
+result:-
+
 	danswer(N,Ct),
 	node(N,Name),
-  format(Out, 'Следует ~q с вероятностью ~q~n', [ Name, Ct ]).
+	nl,write('Следует  '),write(Name),
+	nl,write('Вероятность='),write(Ct).
 
